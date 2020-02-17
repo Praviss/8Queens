@@ -1,6 +1,11 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+
+// admissible heuristic function.
+int fjfj(){
+	
+}
 int heuristic(int graph[][4], int g[], vector<int> not_v,int node){
 	std::vector<int> not_visited;
 	for(int i = 0; i < not_v.size(); ++i){
@@ -38,6 +43,7 @@ int heuristic(int graph[][4], int g[], vector<int> not_v,int node){
 			}
 		}
 	}
+	
 	int w;
 	switch(n){
 		case 0 : 
@@ -53,6 +59,7 @@ int heuristic(int graph[][4], int g[], vector<int> not_v,int node){
 				w = 20;
 				break;
 	}
+
 	cout << "node : " << n << "  m : " << m  << " w : " << w << endl;
 	return cost + m + w;
 }
