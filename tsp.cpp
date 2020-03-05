@@ -4,12 +4,44 @@ using namespace std;
 
 // admissible heuristic function.
 
-int heuristic(int graph[][4], int g[], vector<int> not_v,int node){
+int heuristic(int xq, int **graph, int g[], vector<int> not_v,int node){
+	
 	std::vector<int> not_visited;
 	for(int i = 0; i < not_v.size(); ++i){
 		not_visited.push_back(not_v[i]);
 	}
 	int x = not_visited.size(), n = node;
+	int h1 = 0, h2 = 0, min = INT_MAX;
+	
+	//**********************************************************
+	// for the heuristic h1, closest unvisited city from present node
+	
+	
+	for(int i = 0; i < not_visited.size(); ++i){
+		if(graph[node][not_visited[i]] < min){
+			min = graph[node][not_visited[i]];
+		}
+	}
+	if(min < INT_MAX) h1 = min;
+	min = INT_MAX;
+	
+	
+	// *********************************************************
+	// for the heuristic h2, closest unvisited city from root node
+	
+	
+	for(int i = 0; i < not_visited.size(); ++i){
+		if(graph[0][not_visited[i]] < min){
+			min = graph[0][not_visited[i]];
+		}
+	}
+	if(min < INT_MAX) h2 = min;
+	
+	
+	//**********************************************************
+	// for the heuristic h3 using mst
+	
+	
 	std::vector<int> vis;
 	int cost = 0, idx = 0, m;
 	vis.push_back(node);
@@ -33,6 +65,7 @@ int heuristic(int graph[][4], int g[], vector<int> not_v,int node){
 		// cout << "adding " << m << " to cost .. \n";
 		cost += m;
 	}
+	
 	m = INT_MAX;
 	for(int i = 0; i < not_v.size(); ++i){
 		if(not_v[i] != n){
@@ -41,98 +74,91 @@ int heuristic(int graph[][4], int g[], vector<int> not_v,int node){
 			}
 		}
 	}
-	
-	int w;
-	switch(n){
-		case 0 : 
-				w = 0;
-				break;
-		case 1 :
-				w = 10;
-				break;
-		case 2 :
-				w = 15;
-				break;
-		case 3 :
-				w = 20;
-				break;
-	}
 
-	cout << "node : " << n << "  m : " << m  << " w : " << w << endl;
-	return cost + m + w;
+//	cout << "node : " << n << "  m : " << m  << " w : " << w << endl;
+	return cost + h1 + h2;
 }
 
-void a_star_algo(int graph[][4], int g[], int h[], int node){
+void a_star_algo(int n, int** graph, int g[], int h[], int node){
+	
 	vector<int> visited;
 	vector<int> not_visited;
 	vector<int> open;
 	vector<int> closed;
-	// node graph_data[4];
-	int f[4] = {0, 0, 0, 0};
+	
+	// node graph_data[n];
+	int f[n] = {0};
 
-	for(int i = 0; i < 4; ++i){
+	for(int i = 0; i < n; ++i){
 		not_visited.push_back(i);
 	}
 
 	open.push_back(node);
 
 	// int c = 0;
-	int min = 10000, idx = 0;
-	h[0] = heuristic(graph, g, not_visited, 0);
+	int min = INT_MAX, idx = 0;
+	h[0] = heuristic(n, graph, g, not_visited, 0);
 	f[0] = g[0] + h[0];
 
 	while(1){
-		min = 1000;
-		// cout << "while started..................." << endl;
+		
+		//max value to min, as we have to find the minimum value
+		min = INT_MAX;
+		
+		//loop through to find the city with minimum f value
 		for(int i = 0; i < open.size(); ++i){
-			// cout << "f[open[i]] : " << f[open[i]] << "  min : " << min << "\n"; 
+			
 			if(f[open[i]] < min){
-				// cout << "hfffffffffffffff\n";
 				min = f[open[i]];
 				idx = open[i];
-				// cout << " idx : " << idx;
 			}
+			
 		}
 
+		// current city is stored in node
 		node = idx;
 
-		open.erase(std::remove(open.begin(), open.end(), idx), open.end());
+		// deleting the city from open list
+		open.erase(std::remove(open.begin(), open.end(), node), open.end());
 
-		if(visited.size() == 4) break;
-		int ct = 0;
-		for(int i = 0; i < 4; ++i){
+		if(visited.size() == n) break;
+		int ct = 0, test_f = 0;
+		
+		for(int i = 0; i < n; ++i){
+			/*
 			for(int k = 0; k < closed.size(); ++k){
 				if(closed[k] == i){
 					ct = 1;
 					break;
 				}
 			}
-			if(i != node && ct == 0){
-				// cout << "fmdkj";
-
-				// cout << "node  : " << node <<  "   ";
-
-				if(find(open.begin(), open.end(), i) != open.end())
+			*/
+			if(i != node){
+				
+				test_f = g[node] + graph[node][i] + heuristic(n, graph, g, not_visited, i);
+				
+				if(find(open.begin(), open.end(), i) != open.end()) //if present in open list
 				{
-				    //elem exists in the vector
-				    // cout << "deleting " << i << " from open list" << endl;
-					open.erase(std::remove(open.begin(), open.end(), i), open.end()); //delete that value from node
-					// cout << "\npushing " << i << " in open list\n";
-					open.push_back(i);
-					// cout << " hello  world ";
+				    for(int qw = 0; qw < open.size(); ++qw){
+				    	if(open[qw] == i){
+				    		if(f[open[qw]] < test_f){
+				    			open.erase(std::remove(open.begin(), open.end(), i), open.end()); //delete that value from node
+								open.push_back(i);
+							}
+						}
+					}
 				} 
 				
 
-				//if it is also not in closed
+				//if present in closed list
 				else if(find(closed.begin(), closed.end(), i) != closed.end());
 
 				else {
-					// cout << "\npushing " << i << " in open list\n";
 					open.push_back(i);
 				}
 				
 				g[i] = g[node] + graph[node][i];
-				f[i] = g[i] + heuristic(graph, g, not_visited, i);
+				f[i] = g[i] + heuristic(n, graph, g, not_visited, i);
 			}
 			ct = 0;
 		}
@@ -150,23 +176,52 @@ void a_star_algo(int graph[][4], int g[], int h[], int node){
 		// not_visited.delete(node);
 	}
 	for(int i = 0; i < visited.size(); ++i){
-		cout << visited[i] + 1 << endl;
+		cout << visited[i] + 1 << "  ";
 	}
 }
 
 int main(){
+	int n;
+	cout << "insert number of cities ... \n";
+	cin >> n;
+//	n = 4
+	int **graph;
+	graph = new int *[n];
+	for(int i = 0; i <n; i++)
+    graph[i] = new int[n];
+	for(int i = 0; i < n; ++i){
+		for(int j = 0; j < n; ++j){
+			cout << "enter graph's' " << i << " " << j << endl;
+			cin >> graph[i][j];
+		}
+	}
+	int g[n], h[n];
+	for(int i = 0; i < n; ++i){
+		g[i] = 0;
+		h[i] = 0;
+	}
 	
-	int graph[][4] = {
-		{ 0, 10, 15, 20 }, 
-        { 10, 0, 35, 25 }, 
-        { 15, 35, 0, 30 }, 
-        { 20, 25, 30, 0 }
-	};
+	/*
+	graph[0][0] = 0;
+	graph[0][1] = 10;
+	graph[0][2] = 15;
+	graph[0][3] = 20;
+	graph[1][0] = 10;
+	graph[1][1] = 0;
+	graph[1][2] = 35;
+	graph[1][3] = 25;
+	graph[2][0] = 15;
+	graph[2][1] = 35;
+	graph[2][2] = 0;
+	graph[2][3] = 30;
+	graph[3][0] = 20;
+	graph[3][1] = 25;
+	graph[3][2] = 30;
+	graph[3][3] = 0;
+	*/
+	
 
-	int g[4] = {0, 0, 0, 0};
-	int h[4] = {0, 0, 0, 0};
-
-	a_star_algo(graph, g, h, 0);
+	a_star_algo(n, graph, g, h, 0);
 
 	return 0;
 }
