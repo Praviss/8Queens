@@ -5,9 +5,8 @@ Traveling Salesman Problem using A* Algorithm
 Submitted by :-
   Name : Ravindra Singh Sisodiya
   Roll no. : 1801138
--------------
+
 Here I have represented all the cities as nodes of a Graph.
---------
 
 Initial State: Agent in the start city and has not visited any other city
 
@@ -20,7 +19,6 @@ Edge-cost: distance between the cities represented by the nodes, used this cost 
 h(n): distance to the nearest unvisited city from the current city + estimated distance to travel 
       all the unvisited cities (MST heuristic used here) + nearest distance from an unvisited city to the start city. 
       This is an admissible heuristic function.
-------------
 
 Compile using the command : g++ tsp.cpp -o tsp
 Run using command : ./tsp
